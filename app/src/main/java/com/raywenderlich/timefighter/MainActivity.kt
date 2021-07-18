@@ -6,6 +6,7 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -59,7 +60,11 @@ class MainActivity : AppCompatActivity() {
         gameScoreTextView = binding.gameScoreTextView
         timeLeftTextView = binding.timeLeftTextView
 
-        tapMeButton.setOnClickListener { incrementScore() }
+        tapMeButton.setOnClickListener {
+            val bounceAnimation = AnimationUtils.loadAnimation(this, R.anim.bounce)
+            it.startAnimation(bounceAnimation)
+            incrementScore()
+        }
 
         setGame()
     }
@@ -95,6 +100,9 @@ class MainActivity : AppCompatActivity() {
         score++
         val newScore = getString(R.string.yourScore, score)
         gameScoreTextView.text = newScore
+
+        val blinkAnimation = AnimationUtils.loadAnimation(this, R.anim.blink)
+        gameScoreTextView.startAnimation(blinkAnimation)
     }
 
     private fun startGame() {
@@ -112,7 +120,8 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.gameOverMessage, score),
             5000,
         ).setAnchorView(tapMeButton)
-            .setBackgroundTint(ContextCompat.getColor(this, android.R.color.holo_orange_dark))
+            .setBackgroundTint(ContextCompat.getColor(this, R.color.white))
+            .setTextColor(ContextCompat.getColor(this, R.color.black))
             .show()
 
         setGame()
