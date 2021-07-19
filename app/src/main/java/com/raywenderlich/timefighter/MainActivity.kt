@@ -6,15 +6,19 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
 import com.raywenderlich.timefighter.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
 
     private var score = 0
 
@@ -36,6 +40,9 @@ class MainActivity : AppCompatActivity() {
         private const val SCORE_KEY = "SCORE_KEY"
         private const val TIME_LEFT_KEY = "TIME_LEFT_KEY"
         private const val GAME_STARTED_KEY = "GAME_STARTED_KEY"
+        private val handler: Handler = Handler(Looper.getMainLooper())
+        private lateinit var r: Runnable
+        private var isHandlerOn: Boolean = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +57,33 @@ class MainActivity : AppCompatActivity() {
         }
 
         initActivity()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        super.onOptionsItemSelected(item)
+        if (item.itemId == R.id.actionAbout) showAbout()
+        return true
+    }
+
+    private fun showAbout() {
+        val dialogTitle = getString(R.string.aboutTitle, BuildConfig.VERSION_NAME)
+        val dialogMessage = getString(R.string.aboutMessage)
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(dialogTitle)
+        builder.setMessage(dialogMessage)
+        val dialog = builder.create()
+        dialog.show()
+
+        r = Runnable { dialog.dismiss() }
+        isHandlerOn = true
+        handler.postDelayed(r, 3333)
     }
 
     private fun initActivity() {
@@ -126,9 +160,9 @@ class MainActivity : AppCompatActivity() {
 
         setGame()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            tapMeButton.isClickable = true
-        }, 5000)
+        r = Runnable { tapMeButton.isClickable = true }
+        isHandlerOn = true
+        Handler(Looper.getMainLooper()).postDelayed({ r }, 5000)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -144,6 +178,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        if (isHandlerOn) handler.removeCallbacks(r)
 
         Log.d(TAG, "onDestroy called.")
     }
